@@ -15,22 +15,34 @@ ipc.on("close-main-window",function(){
 app.on("ready", function() {
   var mainWindow = new BrowserWindow({
     resizable: true,
-    width: 640,
-    height: 480,
-    autoHideMenuBar: false,
-    useContentSize: true,
-    transparent: false,
-    frame: true,
+    width: 600,
+    height: 800,
     webPreferences: {
       nodeIntegration: true
     } 
-  })
+  });
   mainWindow.loadURL("file://"+__dirname+"/index.html");
 
   mainWindow.on("closed",function(){
     mainWindow = null;
  });
 
- 
+ ipc.on("open-file-dialog-for-file", function(event) {
+   if (os.platform() === "linux" || os.platform() === "win32")
+   {
+    dialog.showOpenDialog({
+        properties:["openFile"]
+    },function(files){
+      if(files)
+          event.sender.send("selected-file",files[0]);
+    });
+   } else {
+      dialog.showOpenDialog({
+        properties:["openFile", "openDirectory"]
+      }, function(files){
+        if(files)
+          event.sender.send("selected-file",files[0]);
+      });
+   }});
 
 });
